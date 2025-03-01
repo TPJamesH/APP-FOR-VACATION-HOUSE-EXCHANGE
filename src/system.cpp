@@ -51,7 +51,7 @@ void welcome()
     printf("-----------------------------------------\n");
     printf("Developed by: Huynh Tan Phat\n");
     printf("-----------------------------------------\n");
-    printf("Option: 0. Stop the program 1. Enter as Guest  2. Enter as Member 3. Enter as Admin\n");
+    printf("Option: -1. Stop the program 0. Clear screen 1. Enter as Guest  2. Enter as Member 3. Enter as Admin\n");
 }
 void init()
 {
@@ -249,7 +249,9 @@ void viewInformation(Account currentUser)
 {
     currentUser.toString();
 }
-void viewHouses_NonGuest()
+
+//-----ADMIN-----//
+void viewHouses_Admin()
 {
     std::cout << "List of all houses: \n";
     std::vector<House> houses = getAllHouses();
@@ -266,7 +268,6 @@ void viewHouses_NonGuest()
         std::cout << "\n";
     }
 }
-//-----ADMIN-----//
 void viewUsers()
 {
     printf("List of all members: ");
@@ -302,7 +303,7 @@ void process_execute_admin(int choice, const Account &currentUser)
         break;
 
     case 2:
-        viewHouses_NonGuest();
+        viewHouses_Admin();
         break;
 
     case 3:
@@ -445,6 +446,37 @@ void instruction_guest()
 }
 
 //-----MEMBER--//
+void viewHouses_Member()
+{
+    std::cout << "List of all houses  \n\n";
+    std::vector<House> houses = getAllHouses();
+    std::vector<bsoncxx::oid> id_list;
+    int i = 0;
+    int choice = 0;
+    for (House &house : houses)
+    {
+        Account houseOwner(getHouseOwner(house.getOwner()));
+
+        std::cout << "Selection value: " << i << "\n";
+        std::cout << "---House information---" << "\n";
+        std::cout << "Location: " << house.getLocation() << "\n";
+        std::cout << "Description: " << house.getDescription() << "\n";
+        std::cout << "Available: " << ((house.getAvailability()) ? "yes" : "no") << "\n";
+        std::cout << "---Owner's contact information---" << "\n";
+        houseOwner.toString();
+        std::cout << "///////////////////////////" << "\n";
+        id_list.push_back(house.get_id());
+        i++;
+    }
+
+    while (1)
+    {
+        std::cout << "Select a corresponding number for the house that you want to request for occupation: ";
+        std::cin >> choice;
+        std::cout << "Sent request, please wait for the owner's response | Back to the member's UI " << choice << "\n";
+        break;
+    }
+}
 void occupy(const bsoncxx::oid &houseID, const bsoncxx::oid &renterID)
 {
 
@@ -458,7 +490,7 @@ void occupy(const bsoncxx::oid &houseID, const bsoncxx::oid &renterID)
                                      bsoncxx::builder::basic::make_document(
                                          bsoncxx::builder::basic::kvp("renter", renterID))));
 
-    house_collection.find_one_and_update(query.view(),update.view());
+    house_collection.find_one_and_update(query.view(), update.view());
 }
 void process_execute_member(int choice, const Account &currentUser)
 {
@@ -483,7 +515,7 @@ void process_execute_member(int choice, const Account &currentUser)
         break;
 
     case 2:
-        viewHouses_NonGuest();
+        viewHouses_Member();
         break;
 
     default:
@@ -524,52 +556,66 @@ void instruction_member(const Account &currentUser)
 //----EXECUTE--//
 void systemRun()
 {
+
     while (1)
     {
+
         int option;
         printf("Enter your choice: ");
         std::cin >> option;
         ////////////////////////////////
-        if (option > 1)
+        //IN CASE OF BAD INPUT (E.G., INPUT CHAR INSTEAD OF INT)
+        if (!std::cin)
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            printf("Please enter a valid option\n");
+        }
+        else if (option > 1 && option < 4)
         {
             std::string username;
             std::string password;
             while (true)
             {
 
-                printf("Enter username: ");
+                printf("Enter username (press exit to return): ");
                 std::cin >> username;
-
-                printf("Enter password: ");
-                std::cin >> password;
-
-                if (auth(username, password) == false)
-                {
-                    printf("Authorization failed, please try again\n\n");
-                }
-                else
+                if (username.compare("exit") == 0)
                 {
                     break;
                 }
-            }
+                else
+                {
+                    printf("Enter password: ");
+                    std::cin >> password;
 
-            //////////////////////////////
-            // Tuple input(role, username);
-            printf("..................\n");
+                    if (auth(username, password) == false)
+                    {
+                        printf("Authorization failed, please try again\n\n");
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
 
-            Account temp = getCurrentSession(username, password);
-            clear();
-            printf("Authorization successfully\n\n");
-            std::cout << "Welcome, " << username << "\n";
+                //////////////////////////////
+                printf("..................\n");
 
-            if (temp.getRole().compare("Member") == 0)
-            {
+                Account temp = getCurrentSession(username, password);
+                clear();
+                printf("Authorization successfully\n\n");
+                std::cout << "Welcome, " << username << "\n";
 
-                instruction_member(temp);
-            }
-            else
-            {
-                instruction_admin(temp);
+                if (temp.getRole().compare("Member") == 0)
+                {
+
+                    instruction_member(temp);
+                }
+                else
+                {
+                    instruction_admin(temp);
+                }
             }
         }
         else if (option == 1)
@@ -577,10 +623,18 @@ void systemRun()
             clear();
             instruction_guest();
         }
-        else
+        else if (option == 0)
+        {
+            clear();
+            welcome();
+        }
+        else if (option == -1)
         {
             printf("See you again soon\n");
             break;
+        }
+        else{
+            printf("Please enter a valid option\n");
         }
     }
 }

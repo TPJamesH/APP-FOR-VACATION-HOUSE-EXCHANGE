@@ -26,9 +26,10 @@ void addAccount(Account newUser);
 
 //---GENERAL---//
 void viewInformation(Account currentUser);
-void viewHouses_NonGuest();
+
 
 //-----ADMIN-----//
+void viewHouses_Admin();
 void viewUsers();
 void process_execute_admin(int choice,const Account &currentUser);
 void instruction_admin(const Account &currentUser);
@@ -40,6 +41,7 @@ void process_execute_guest(int choice);
 void instruction_guest();
 
 //--MEMBER--//
+void viewHouses_Member();
 void occupy(const bsoncxx::oid &houseID, const bsoncxx::oid &renterID);
 void process_execute_member(int choice,const Account &currentUser);
 void instruction_member(const Account &currentUser);
