@@ -51,3 +51,14 @@ bool Request::getApproval() const{
 void Request::setApproval(const bool & approval){
     this->approval = approval;
 }
+
+bsoncxx::document::value Request::to_bson() const
+{
+    bsoncxx::builder::basic::document doc{};
+    doc.append(bsoncxx::builder::basic::kvp("_id", id));
+    doc.append(bsoncxx::builder::basic::kvp("message", msg));
+    doc.append(bsoncxx::builder::basic::kvp("requesterID", requester));
+    doc.append(bsoncxx::builder::basic::kvp("houseID", house));
+    doc.append(bsoncxx::builder::basic::kvp("approval", approval));
+    return doc.extract();
+}

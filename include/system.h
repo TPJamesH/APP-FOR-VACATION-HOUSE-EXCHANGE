@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include "account.h"
 #include "house.h"
+#include "request.h"
 #include <vector>
 #include <iostream>
 
@@ -41,7 +42,7 @@ void process_execute_guest(int choice);
 void instruction_guest();
 
 //--MEMBER--//
-void viewHouses_Member();
+void viewHouses_Member( const Account &currentUser);
 void occupy(const bsoncxx::oid &houseID, const bsoncxx::oid &renterID);
 void process_execute_member(int choice,const Account &currentUser);
 void instruction_member(const Account &currentUser);

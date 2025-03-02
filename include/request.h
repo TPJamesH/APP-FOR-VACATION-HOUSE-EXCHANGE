@@ -42,5 +42,6 @@ public:
     bool getApproval() const;
     void setApproval(const bool &approval);
 
+    bsoncxx::document::value to_bson() const;
 };
 #endif
