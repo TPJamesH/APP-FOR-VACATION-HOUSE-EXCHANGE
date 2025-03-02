@@ -32,16 +32,22 @@ public:
 
     //Functions
     bsoncxx::oid get_id() const;
+
     std::string getLocation() const;
     void setLocation(const std::string &location);
+
     std::string getDescription() const;
     void setDescription(const std::string &description);
+
     bool getAvailability() const;
     void setAvailability(const bool &status);
+
     bsoncxx::oid getOwner() const;
     void setOwner(const bsoncxx::oid &newOwner);
+
     bsoncxx::oid getRenter() const;
     void setRenter(const bsoncxx::oid &newRenter);
+    
     void toString_Guest();
     bsoncxx::document::value to_bson() const;
 };

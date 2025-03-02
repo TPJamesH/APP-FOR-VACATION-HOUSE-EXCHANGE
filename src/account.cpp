@@ -96,11 +96,6 @@ void Account::toString()
     std::cout << "Username: " << std::string(userName.empty() == false ? userName : none) << "\n";
     std::cout << "Full Name: " << std::string(fullName.empty() == false ? fullName : none) << "\n";
     std::cout << "Phone Number: " << std::string(phoneNumber.empty() == false ? phoneNumber : none) << "\n";
-    //
-
-    // std::cout << "Username: " << userName  << "\n";
-    // std::cout << "Full Name: " << fullName  << "\n";
-    // std::cout << "Phone Number: " << phoneNumber  << "\n";
 }
 
 bsoncxx::document::value Account::to_bson() const
