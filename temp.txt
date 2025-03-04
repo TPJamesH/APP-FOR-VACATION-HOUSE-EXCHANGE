@@ -248,46 +248,6 @@ void addAccount(Account newUser)
     acc_collection.insert_one(bsonDoc.view());
 }
 
-Account getAccountById(const std::string &attr,const bsoncxx::oid &id)
-{
-    auto query = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp(attr, id));
-
-    auto cursor = acc_collection.find_one(query.view());
-
-    auto doc = cursor->view();
-
-    std::string userName = doc["userName"].get_string().value.data();
-    std::string fullName = doc["fullName"].get_string().value.data();
-    std::string phoneNumber = doc["phoneNumber"].get_string().value.data();
-    std::string role = doc["role"].get_string().value.data();
-    bsoncxx::oid temp_id = doc["_id"].get_oid().value;
-
-    Account newAccount(userName, fullName, phoneNumber, role);
-    newAccount.setID(temp_id);
-
-    return newAccount;
-}
-
-House getHouseById(const std::string &attr, const bsoncxx::oid &id)
-{
-    auto query = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp(attr, id));
-
-    auto cursor = house_collection.find_one(query.view());
-
-    auto doc = cursor->view();
-
-    std::string location = std::string(doc["location"].get_string().value.data());
-    std::string description = std::string(doc["description"].get_string().value.data());
-    bool isAvailable = doc["available"].get_bool().value;
-    bsoncxx::oid temp_id = doc["_id"].get_oid().value;
-
-    House newHouse(location, description, isAvailable);
-    newHouse.setID(temp_id);
-
-    return newHouse;
-}
 //----GENERAL---//
 void viewInformation(Account currentUser)
 {
@@ -678,14 +638,23 @@ void viewNotification(const Account &currentUser)
         {
             // std::cout << i_request.get_id().to_string() << "\n";
             // GET THE REQUESTER
-            Account current = getAccountById("_id",i_request.getRequester());
+            auto requester_query = bsoncxx::builder::basic::make_document(
+                bsoncxx::builder::basic::kvp("_id", i_request.getRequester()));
 
-            if (current.getUserName().compare(currentUser.getUserName()) != 0 &&
-                current.getphoneNumber().compare(currentUser.getphoneNumber()) != 0)
+            auto requester_cursor = acc_collection.find_one(requester_query.view());
+
+            auto doc = requester_cursor->view();
+
+            std::string userName = doc["userName"].get_string().value.data();
+            std::string fullName = doc["fullName"].get_string().value.data();
+            std::string phoneNumber = doc["phoneNumber"].get_string().value.data();
+            std::string role = doc["role"].get_string().value.data();
+            if (userName.compare(currentUser.getUserName()) != 0 &&
+                phoneNumber.compare(currentUser.getphoneNumber()) != 0)
             {
                 std::cout << "///////////////////////////\n--Requester information--\n";
 
-                current.toString();
+                Account(userName, fullName, phoneNumber, role).toString();
                 ////////////////////////////////////
                 std::cout << "Message: " << i_request.getMessage() << "\n";
             }
@@ -703,9 +672,24 @@ std::vector<House> getOwnHouse(const Account &currentUser)
     ///////////////////////////////
     std::cout << "Here is a list of houses that you current owned\n";
 
+    // QUERY TO GET THE HOUSE(S) OF THE CURRENT OWNER
+
+    //******************** */
+    // QUERY TO GET THE ID OF THE HOUSE'S OWNER
+    auto query_house_owner = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("userName", currentUser.getUserName()),
+        bsoncxx::builder::basic::kvp("fullName", currentUser.getFullName()),
+        bsoncxx::builder::basic::kvp("phoneNumber", currentUser.getphoneNumber()));
+
+    // GET THE ID OF THE HOUSE'S OWNER
+    auto house_owner_ob = acc_collection.find_one(query_house_owner.view());
+    auto doc_house_owner = house_owner_ob->view();
+    bsoncxx::oid house_owner_id = doc_house_owner["_id"].get_oid().value;
+
+    //******************** */
     //////////////////////////////////////////////////
     auto query_house = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("owner", currentUser.get_id()));
+        bsoncxx::builder::basic::kvp("owner", house_owner_id));
     // Get house(s)
     auto list_house = house_collection.find(query_house.view());
 

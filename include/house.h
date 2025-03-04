@@ -32,6 +32,8 @@ public:
 
     //Functions
     bsoncxx::oid get_id() const;
+    
+void setID(const bsoncxx::oid &id);
 
     std::string getLocation() const;
     void setLocation(const std::string &location);

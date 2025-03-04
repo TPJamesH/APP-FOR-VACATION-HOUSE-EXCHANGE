@@ -21,6 +21,10 @@ bsoncxx::oid House::get_id() const
 {
     return id;
 }
+
+void House::setID(const bsoncxx::oid &id){
+    this->id = id;
+}
 std::string House::getLocation() const
 {
     return location;

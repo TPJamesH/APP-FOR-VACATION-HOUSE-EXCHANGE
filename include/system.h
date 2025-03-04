@@ -24,6 +24,8 @@ std::vector<Account> getAllUsers();
 Account getHouseOwner(const bsoncxx::oid &owner);
 Account getCurrentSession(const std::string &username, const std::string &password);
 void addAccount(Account newUser);
+Account getAccountById(const std::string &attr,const bsoncxx::oid &id);
+House getHouseById(const std::string &attr,const bsoncxx::oid &id);
 
 //---GENERAL---//
 void viewInformation(Account currentUser);

@@ -41,6 +41,7 @@ public:
 
     //Functions
     bsoncxx::oid get_id() const;
+    void setID(const bsoncxx::oid &id);
 
     std::string getUserName() const;
     void setUserName(const std::string &userName);
