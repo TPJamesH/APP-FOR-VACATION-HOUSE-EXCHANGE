@@ -52,6 +52,7 @@ void Request::setApproval(const bool & approval){
     this->approval = approval;
 }
 
+
 bsoncxx::document::value Request::to_bson() const
 {
     bsoncxx::builder::basic::document doc{};

@@ -605,7 +605,44 @@ void instruction_member(const Account &currentUser)
         }
     }
 }
+void viewNotification(const Account &currentUser){
 
+}
+
+void getOwnHouse(const Account &currentUser){
+    //Debug section
+    std::cout << "Debug statement" <<currentUser.get_id().to_string() << "\n";
+    ///////////////////////////////
+    std::cout << "Here is a list of houses that you current owned\n";
+
+    // QUERY TO GET HOUSES
+    auto query_house = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("owner", currentUser.get_id())
+    );
+    //Get house(s)
+    auto list_house = house_collection.find(query_house.view());
+
+    std::vector<House> myHouses;
+
+    for (const auto &doc: list_house){
+        House temp;
+
+        //extract the elements
+        std::string location = std::string(doc["location"].get_string().value.data());
+        std::string description = std::string(doc["description"].get_string().value.data());
+        bool isAvailable = doc["available"].get_bool().value;
+
+        temp.setLocation(location);
+        temp.setDescription(description);
+        temp.setAvailability(isAvailable);
+
+        myHouses.push_back(temp);
+    }
+}
+
+std::vector<Request> getMyRequest(const House &myHouse){
+
+}
 //----EXECUTE--//
 void systemRun()
 {
