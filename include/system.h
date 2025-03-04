@@ -24,6 +24,8 @@ std::vector<Account> getAllUsers();
 Account getHouseOwner(const bsoncxx::oid &owner);
 Account getCurrentSession(const std::string &username, const std::string &password);
 void addAccount(Account newUser);
+Account getAccountById(const std::string &attr,const bsoncxx::oid &id);
+House getHouseById(const std::string &attr,const bsoncxx::oid &id);
 
 //---GENERAL---//
 void viewInformation(Account currentUser);
@@ -46,7 +48,9 @@ void viewHouses_Member( const Account &currentUser);
 void occupy(const bsoncxx::oid &houseID, const bsoncxx::oid &renterID);
 void process_execute_member(int choice,const Account &currentUser);
 void instruction_member(const Account &currentUser);
-
+void viewNotification(const Account &currentUser);
+std::vector<House> getOwnHouse(const Account &currentUser);
+std::vector<Request> getMyRequest(const House &myHouse);
 //--EXECUTE--//
 void systemRun();
 

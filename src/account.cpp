@@ -41,6 +41,9 @@ bsoncxx::oid Account::get_id() const
     return id;
 }
 
+void Account::setID(const bsoncxx::oid &id){
+    this->id =id ;
+}
 std::string Account::getUserName() const
 {
     return userName;
