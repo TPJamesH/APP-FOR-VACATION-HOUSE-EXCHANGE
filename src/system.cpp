@@ -1,4 +1,5 @@
 #include "../include/system.h"
+#include <vector>
 
 mongocxx::instance instance{};
 mongocxx::client client(mongocxx::uri{});
@@ -468,7 +469,7 @@ void viewHouses_Member(const Account &currentUser)
         std::cout << "///////////////////////////" << "\n";
         choice++; // Lazy on this one
     }
-    
+
     choice = 0;
 
     bool valid = false;
@@ -518,7 +519,8 @@ void viewHouses_Member(const Account &currentUser)
             std::cout << "Request sent, please wait for the owner's response" << "\n";
             valid = true;
         }
-        else if(choice == -1){
+        else if (choice == -1)
+        {
             break;
         }
         else
@@ -569,6 +571,9 @@ void process_execute_member(int choice, const Account &currentUser)
     case 2:
         viewHouses_Member(currentUser);
         break;
+    
+    case 3:
+        viewNotification(currentUser);
 
     default:
         printf("Please enter a valid option");
@@ -605,46 +610,70 @@ void instruction_member(const Account &currentUser)
         }
     }
 }
-void viewNotification(const Account &currentUser){
-    //Get houses first
+void viewNotification(const Account &currentUser)
+{
+    // Get houses first
     std::vector<House> myHouses = getOwnHouse(currentUser);
-
-    std::vector<vector<Request>> myRequests;
-    //Then get requests of each house
-    for (const House &house: myHouses){
+    int index = 0;
+    std::vector<std::vector<Request>> myRequests;
+    // Then get requests of each house
+    for (const House &house : myHouses)
+    {
         std::vector<Request> currentRequest = getMyRequest(house);
         myRequests.push_back(currentRequest);
     }
 
-    //CONTINUE HERE
-    // for (auto m_request: myRequests) {
-    //     for (auto i_request: m_request) {
-    //         cout << i_request.toString() << "\n";
-    //     }
-    // }
-    //   cout << endl;
+    // CONTINUE HERE
+    for (auto m_request : myRequests)
+    {
+        std::cout<< "Request of the house with the following information:\n";
+        myHouses.at(index).toString_Guest();
+        for (auto i_request : m_request)
+        {
+            //std::cout << i_request.get_id().to_string() << "\n";
+            std::cout<< "Requester information:\n";
 
+            //GET THE REQUESTER
+            auto requester_query = bsoncxx::builder::basic::make_document(
+                bsoncxx::builder::basic::kvp("_id", i_request.getRequester()));
+
+            auto requester_cursor = acc_collection.find_one(requester_query.view());
+
+            auto doc = requester_cursor->view();
+            
+            std::string userName = doc["userName"].get_string().value.data();
+            std::string fullName = doc["fullName"].get_string().value.data();
+            std::string phoneNumber = doc["phoneNumber"].get_string().value.data();
+            
+            Account(userName,fullName,phoneNumber).toString();
+            ////////////////////////////////////
+            std::cout << "Message: "<< i_request.getMessage() << "\n";
+        }
+        index++;
+    }
+    std::cout << std::endl;
 }
 
-std::vector<House> getOwnHouse(const Account &currentUser){
-    //Debug section
-    std::cout << "Debug statement" <<currentUser.get_id().to_string() << "\n";
+std::vector<House> getOwnHouse(const Account &currentUser)
+{
+    // Debug section
+    std::cout << "Debug statement" << currentUser.get_id().to_string() << "\n";
     ///////////////////////////////
     std::cout << "Here is a list of houses that you current owned\n";
 
     // QUERY TO GET HOUSES
     auto query_house = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("owner", currentUser.get_id())
-    );
-    //Get house(s)
+        bsoncxx::builder::basic::kvp("owner", currentUser.get_id()));
+    // Get house(s)
     auto list_house = house_collection.find(query_house.view());
 
     std::vector<House> myHouses;
-    //Loop through the obtained list of houses, extract the respective attributes and store them in a temporary House object
-    for (const auto &doc: list_house){
+    // Loop through the obtained list of houses, extract the respective attributes and store them in a temporary House object
+    for (const auto &doc : list_house)
+    {
         House temp;
 
-        //extract the elements
+        // extract the elements
         std::string location = std::string(doc["location"].get_string().value.data());
         std::string description = std::string(doc["description"].get_string().value.data());
         bool isAvailable = doc["available"].get_bool().value;
@@ -656,33 +685,34 @@ std::vector<House> getOwnHouse(const Account &currentUser){
         myHouses.push_back(temp);
     }
 
-    //Return the list
+    // Return the list
     return myHouses;
 }
 
-std::vector<Request> getMyRequest(const House &myHouse){
-     //Debug section
-     std::cout << "Debug statement" <<myHouse.get_id().to_string() << "\n";
-     ///////////////////////////////
-     std::cout << "You have receive a/multiple request(s) \n";
+std::vector<Request> getMyRequest(const House &myHouse)
+{
+    // Debug section
+    std::cout << "Debug statement" << myHouse.get_id().to_string() << "\n";
+    ///////////////////////////////
+    std::cout << "You have receive a/multiple request(s) \n";
 
-      // QUERY TO GET REQUESTS
+    // QUERY TO GET REQUESTS
     auto query_request = bsoncxx::builder::basic::make_document(
-        bsoncxx::builder::basic::kvp("houseID", myHouse.get_id())
-    );
-    //Get request
+        bsoncxx::builder::basic::kvp("houseID", myHouse.get_id()));
+    // Get request
     auto list_request = request_collection.find(query_request.view());
 
     std::vector<Request> myRequests;
-    //Loop through the obtained list of request;, extract the respective attributes and store them in a temporary House object
-    for (const auto &doc: list_rquest){
+    // Loop through the obtained list of request;, extract the respective attributes and store them in a temporary House object
+    for (const auto &doc : list_request)
+    {
         Request temp;
 
-        //extract the elements
-          bsoncxx::oid requester_id = doc["requesterID"].get_oid().value;
-          bsoncxx::oid house_id = myHouse.get_id();
-          bool approval = doc["approval"].get_bool().value();
-          std::string msg =  std::string(doc["message"].get_string().value.data());
+        // extract the elements
+        bsoncxx::oid requester_id = doc["requesterID"].get_oid().value;
+        bsoncxx::oid house_id = myHouse.get_id();
+        bool approval = doc["approval"].get_bool().value;
+        std::string msg = std::string(doc["message"].get_string().value.data());
 
         temp.setApproval(approval);
         temp.setRequester(requester_id);
@@ -691,9 +721,8 @@ std::vector<Request> getMyRequest(const House &myHouse){
 
         myRequests.push_back(temp);
     }
-    //Return the list
+    // Return the list
     return myRequests;
-
 }
 //----EXECUTE--//
 void systemRun()
