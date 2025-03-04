@@ -606,10 +606,27 @@ void instruction_member(const Account &currentUser)
     }
 }
 void viewNotification(const Account &currentUser){
+    //Get houses first
+    std::vector<House> myHouses = getOwnHouse(currentUser);
+
+    std::vector<vector<Request>> myRequests;
+    //Then get requests of each house
+    for (const House &house: myHouses){
+        std::vector<Request> currentRequest = getMyRequest(house);
+        myRequests.push_back(currentRequest);
+    }
+
+    //CONTINUE HERE
+    // for (auto m_request: myRequests) {
+    //     for (auto i_request: m_request) {
+    //         cout << i_request.toString() << "\n";
+    //     }
+    // }
+    //   cout << endl;
 
 }
 
-void getOwnHouse(const Account &currentUser){
+std::vector<House> getOwnHouse(const Account &currentUser){
     //Debug section
     std::cout << "Debug statement" <<currentUser.get_id().to_string() << "\n";
     ///////////////////////////////
@@ -623,7 +640,7 @@ void getOwnHouse(const Account &currentUser){
     auto list_house = house_collection.find(query_house.view());
 
     std::vector<House> myHouses;
-
+    //Loop through the obtained list of houses, extract the respective attributes and store them in a temporary House object
     for (const auto &doc: list_house){
         House temp;
 
@@ -638,9 +655,44 @@ void getOwnHouse(const Account &currentUser){
 
         myHouses.push_back(temp);
     }
+
+    //Return the list
+    return myHouses;
 }
 
 std::vector<Request> getMyRequest(const House &myHouse){
+     //Debug section
+     std::cout << "Debug statement" <<myHouse.get_id().to_string() << "\n";
+     ///////////////////////////////
+     std::cout << "You have receive a/multiple request(s) \n";
+
+      // QUERY TO GET REQUESTS
+    auto query_request = bsoncxx::builder::basic::make_document(
+        bsoncxx::builder::basic::kvp("houseID", myHouse.get_id())
+    );
+    //Get request
+    auto list_request = request_collection.find(query_request.view());
+
+    std::vector<Request> myRequests;
+    //Loop through the obtained list of request;, extract the respective attributes and store them in a temporary House object
+    for (const auto &doc: list_rquest){
+        Request temp;
+
+        //extract the elements
+          bsoncxx::oid requester_id = doc["requesterID"].get_oid().value;
+          bsoncxx::oid house_id = myHouse.get_id();
+          bool approval = doc["approval"].get_bool().value();
+          std::string msg =  std::string(doc["message"].get_string().value.data());
+
+        temp.setApproval(approval);
+        temp.setRequester(requester_id);
+        temp.setHouse(house_id);
+        temp.setMessage(msg);
+
+        myRequests.push_back(temp);
+    }
+    //Return the list
+    return myRequests;
 
 }
 //----EXECUTE--//

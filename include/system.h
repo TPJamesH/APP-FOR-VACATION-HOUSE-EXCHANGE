@@ -47,7 +47,7 @@ void occupy(const bsoncxx::oid &houseID, const bsoncxx::oid &renterID);
 void process_execute_member(int choice,const Account &currentUser);
 void instruction_member(const Account &currentUser);
 void viewNotification(const Account &currentUser);
-void getOwnHouse(const Account &currentUser);
+std::vector<House> getOwnHouse(const Account &currentUser);
 std::vector<Request> getMyRequest(const House &myHouse);
 //--EXECUTE--//
 void systemRun();
